@@ -84,9 +84,10 @@ export async function runListMode(cfg, log) {
       }
 
       try {
-        await postTweet(comment, cfg.cookiesFile, { replyToId: t.id });
+        const replyTweetId = await postTweet(comment, cfg.cookiesFile, { replyToId: t.id });
         markCommented(t.id, t.author);
-        log(`[mode-A] OK reply ${t.id} @${t.author} lang=${lang} "${comment.slice(0, 60)}..."`);
+        const commentUrl = `https://x.com/i/web/status/${replyTweetId}`;
+        log(`[mode-A] OK reply ${t.id} @${t.author} lang=${lang} reply_id=${replyTweetId} reply_url=${commentUrl} "${comment.slice(0, 60)}..."`);
       } catch (e) {
         log(`[mode-A] post fail ${t.id}: ${e.message}`);
         if (/RATE_LIMITED/.test(e.message)) {

@@ -1,8 +1,10 @@
 /**
  * Detect language based on Unicode character ranges.
- * Returns one of: ja, ko, zh, en
+ * Returns one of: vi, ja, ko, zh, en
  */
 export function detectLanguage(text) {
+  // Vietnamese-specific letters (with/without tone marks)
+  if (/[ăâđêôơưĂÂĐÊÔƠƯàáạảãằắặẳẵầấậẩẫèéẹẻẽềếệểễìíịỉĩòóọỏõồốộổỗờớợởỡùúụủũừứựửữỳýỵỷỹ]/.test(text)) return 'vi';
   if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return 'ja';
   if (/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(text)) return 'ko';
   if (/[\u4E00-\u9FFF]/.test(text)) {

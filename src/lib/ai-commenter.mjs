@@ -6,6 +6,7 @@ import { isFollowBackRequest, followBackReply } from './language.mjs';
 
 const LANG_INSTRUCTION = {
   en: 'Write the reply in English.',
+  vi: 'Viết câu trả lời bằng tiếng Việt tự nhiên.',
   ja: '日本語で返信を書いてください。',
   ko: '한국어로 답글을 작성하세요.',
   zh: '请用中文（简体）写回复。',
