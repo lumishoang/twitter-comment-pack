@@ -3,7 +3,6 @@
  * the configured language + style.
  */
 import { fetchListTweets, postTweet } from '../lib/twitter-http.mjs';
-import { detectLanguage } from '../lib/language.mjs';
 import { generateComment } from '../lib/ai-commenter.mjs';
 import { alreadyCommented, markCommented, acquireTweetLock, releaseTweetLock } from '../lib/store.mjs';
 import { waitForSlot, postSleep } from '../lib/rate-limiter.mjs';
@@ -68,7 +67,7 @@ export async function runListMode(cfg, log) {
 
       await waitForSlot(cfg, log);
       const langSetting = cfg.modeA?.language || 'auto';
-      const lang = langSetting === 'auto' ? detectLanguage(t.fullText) : langSetting;
+      const lang = langSetting === 'auto' ? 'auto' : langSetting;
 
       let comment;
       try {
