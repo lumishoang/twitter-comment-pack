@@ -85,6 +85,16 @@ Start: `npm start`. Logs: `data/run.log`.
 - Cookies expire (~2-4 weeks) → re-export and re-run wizard (Q1 only).
 - Mode B is for viral / signal / analysis content only. NOT for news spam.
 
+
+### Cookie health & rotation
+
+```bash
+npm run cookie:check
+npm run cookie:replace -- /path/to/new-cookies.json
+```
+
+See `guides/05-cookie-rotation.md` for the recommended rotation SOP.
+
 ### Uninstall autostart
 ```cmd
 schtasks /Delete /TN TwitterCommentPack /F
