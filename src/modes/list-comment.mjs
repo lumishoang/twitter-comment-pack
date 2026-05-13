@@ -75,6 +75,17 @@ export async function runListMode(cfg, log) {
         t.retweetedText ? `\nRetweeted context:\n${t.retweetedText}` : '',
       ].filter(Boolean).join('\n');
 
+      const readabilitySample = [t.fullText || '', t.quotedText || '', t.retweetedText || ''].join(' ')
+        .replace(/https?:\/\/\S+/g, ' ')
+        .replace(/[#@]\w+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const hasReadableContent = readabilitySample.length >= 20 && /[\p{L}\p{N}]/u.test(readabilitySample);
+      if (!hasReadableContent) {
+        log(`[mode-A] skip ${t.id}: unreadable/insufficient content`);
+        continue;
+      }
+
       let comment;
       try {
         comment = await generateComment({
