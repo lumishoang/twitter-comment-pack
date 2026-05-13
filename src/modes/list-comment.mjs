@@ -51,28 +51,7 @@ export async function runListMode(cfg, log) {
     }
   }
 
-  const hotScore = (t) => {
-    const ageHours = Math.max(0, (Date.now() - new Date(t.createdAt).getTime()) / 3600000);
-    const freshnessBoost = Math.max(0.2, 2 - (ageHours / 12));
-    const engagement =
-      (Number(t.viewCount || 0) / 1000) +
-      (Number(t.likeCount || 0) * 1.5) +
-      (Number(t.retweetCount || 0) * 2.0) +
-      (Number(t.replyCount || 0) * 1.8) +
-      (Number(t.quoteCount || 0) * 1.2);
-    return engagement * freshnessBoost;
-  };
-
-  pool.sort((a, b) => {
-    const d = hotScore(b) - hotScore(a);
-    if (d !== 0) return d;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
-
-  if (pool.length > 0) {
-    const top = pool[0];
-    log(`[mode-A] hot pick ${top.id}: views=${top.viewCount || 0} likes=${top.likeCount || 0} rts=${top.retweetCount || 0} replies=${top.replyCount || 0}`);
-  }
+  pool.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   for (const t of pool) {
     if (!acquireTweetLock(t.id)) {
