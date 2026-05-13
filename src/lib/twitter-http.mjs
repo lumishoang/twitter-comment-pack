@@ -207,6 +207,11 @@ function parseTweetEntry(entry) {
     lang: legacy.lang,
     inReplyToStatusId: legacy.in_reply_to_status_id_str || null,
     isRetweet: Boolean(legacy.retweeted_status_result) || Boolean(legacy.retweeted_status_id_str),
+    replyCount: Number(legacy.reply_count || 0),
+    retweetCount: Number(legacy.retweet_count || 0),
+    likeCount: Number(legacy.favorite_count || 0),
+    quoteCount: Number(legacy.quote_count || 0),
+    viewCount: Number(legacy.views?.count || 0),
   };
 }
 
