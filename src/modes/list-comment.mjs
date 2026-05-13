@@ -16,20 +16,33 @@ export async function runListMode(cfg, log) {
     return;
   }
 
+  const rawMaxAgeHours = cfg.modeA?.maxTweetAgeHours;
+  const hasAgeLimit = Number(rawMaxAgeHours) > 0;
+  const maxAgeHours = hasAgeLimit ? Number(rawMaxAgeHours) : null;
+  const maxAgeMs = hasAgeLimit ? (maxAgeHours * 60 * 60 * 1000) : null;
+  const nowMs = Date.now();
+
   const pool = [];
   const seen = new Set();
+  let skippedOld = 0;
   for (const id of listIds) {
     try {
       const tweets = await fetchListTweets(String(id).trim(), cfg.cookiesFile, 30);
       for (const t of tweets) {
         if (!t.id || !t.fullText || t.fullText.length < 10) continue;
         if (t.isRetweet) continue;
+        const createdMs = new Date(t.createdAt).getTime();
+        if (!Number.isFinite(createdMs)) continue;
+        if (hasAgeLimit && (nowMs - createdMs) > maxAgeMs) {
+          skippedOld++;
+          continue;
+        }
         if (seen.has(t.id)) continue;
         if (alreadyCommented(t.id)) continue;
         seen.add(t.id);
         pool.push(t);
       }
-      log(`[mode-A] list ${id}: pool size now ${pool.length}`);
+      log(`[mode-A] list ${id}: pool size now ${pool.length} (skip_old=${skippedOld}, max_age_h=${hasAgeLimit ? maxAgeHours : 'all'})`);
     } catch (e) {
       log(`[mode-A] list ${id} fetch failed: ${e.message}`);
       if (/401|403/.test(e.message)) {
