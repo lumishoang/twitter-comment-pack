@@ -4,7 +4,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export async function waitForSlot(cfg, log) {
   while (true) {
-    const cap = cfg.commentsPerHour;
+    const cap = Number(cfg.commentsPerHour) || 15;
     const count = commentsInLastHour();
     if (count < cap) return;
     const waitMs = 5 * 60_000 + Math.floor(Math.random() * 60_000);

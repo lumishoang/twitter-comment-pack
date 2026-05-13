@@ -10,7 +10,9 @@
     "start": "node src/index.mjs",
     "setup": "node setup-wizard.mjs",
     "install-service": "node scripts/install-autostart.mjs",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "cookie:check": "node src/cookie-check.mjs",
+    "cookie:replace": "node src/replace-cookies.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^11.3.0",

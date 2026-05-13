@@ -10,6 +10,7 @@ import { runListMode } from './modes/list-comment.mjs';
 import { runAmplifyMode } from './modes/amplify.mjs';
 import { runHybridMode } from './modes/hybrid.mjs';
 import { runWarmup } from './warmup.mjs';
+import { checkCookieHealth } from './lib/cookie-health.mjs';
 
 const DEBUG = process.argv.includes('--debug');
 const RUN_LOG = 'data/run.log';
@@ -30,6 +31,14 @@ async function main() {
   log('Twitter Comment Pack starting...');
   const cfg = loadConfig();
   initStore('data/store.db');
+
+  const cookieHealth = await checkCookieHealth(cfg.cookiesFile);
+  if (!cookieHealth.ok) {
+    log(`Cookie health failed: ${cookieHealth.code} - ${cookieHealth.detail}`);
+    await sendAlert(cfg.telegram?.botToken, cfg.telegram?.chatId,
+      `[twitter-comment-pack] STOPPED: cookie health failed (${cookieHealth.code}) - ${cookieHealth.detail}`);
+    process.exit(1);
+  }
   log(`Mode: ${cfg.mode} | AI: ${cfg.ai.provider} | Rate: ${cfg.commentsPerHour}/hr`);
 
   await sendAlert(cfg.telegram?.botToken, cfg.telegram?.chatId,

@@ -29,6 +29,11 @@ export function initStore(dbPath = 'data/store.db') {
       k TEXT PRIMARY KEY,
       v TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS in_flight (
+      tweet_id TEXT PRIMARY KEY,
+      ts INTEGER NOT NULL
+    );
   `);
   return db;
 }
@@ -49,6 +54,21 @@ export function commentsInLastHour() {
   const since = Date.now() - 60 * 60 * 1000;
   const row = db.prepare('SELECT COUNT(*) AS c FROM commented WHERE ts >= ?').get(since);
   return row.c;
+}
+
+export function acquireTweetLock(tweetId, ttlMs = 30 * 60 * 1000) {
+  if (!db) return true;
+  const now = Date.now();
+  db.prepare('DELETE FROM in_flight WHERE ts < ?').run(now - ttlMs);
+  const exists = db.prepare('SELECT 1 FROM in_flight WHERE tweet_id = ?').get(tweetId);
+  if (exists) return false;
+  db.prepare('INSERT INTO in_flight(tweet_id, ts) VALUES(?, ?)').run(tweetId, now);
+  return true;
+}
+
+export function releaseTweetLock(tweetId) {
+  if (!db) return;
+  db.prepare('DELETE FROM in_flight WHERE tweet_id = ?').run(tweetId);
 }
 
 export function warmupSeen(target, tweetId, action) {
