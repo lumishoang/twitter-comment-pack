@@ -187,9 +187,21 @@ function parseTweetEntry(entry) {
     userResult?.core?.screen_name ||
     userResult?.legacy?.screen_name ||
     'unknown';
+
+  const quotedLegacy =
+    tweet?.quoted_status_result?.result?.legacy ||
+    tweet?.quoted_status_result?.result?.tweet?.legacy ||
+    null;
+  const retweetedLegacy =
+    legacy?.retweeted_status_result?.result?.legacy ||
+    legacy?.retweeted_status_result?.result?.tweet?.legacy ||
+    null;
+
   return {
     id: tweet.rest_id || tweet.tweet?.rest_id || legacy.id_str,
     fullText: legacy.full_text || '',
+    quotedText: quotedLegacy?.full_text || '',
+    retweetedText: retweetedLegacy?.full_text || '',
     author,
     createdAt: twitterCreatedAtToIso(legacy.created_at),
     lang: legacy.lang,

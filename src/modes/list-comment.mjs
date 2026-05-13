@@ -69,10 +69,16 @@ export async function runListMode(cfg, log) {
       const langSetting = cfg.modeA?.language || 'auto';
       const lang = langSetting === 'auto' ? 'auto' : langSetting;
 
+      const promptTweetText = [
+        `Main post:\n${t.fullText || ''}`,
+        t.quotedText ? `\nQuoted context:\n${t.quotedText}` : '',
+        t.retweetedText ? `\nRetweeted context:\n${t.retweetedText}` : '',
+      ].filter(Boolean).join('\n');
+
       let comment;
       try {
         comment = await generateComment({
-          tweetText: t.fullText,
+          tweetText: promptTweetText,
           lang,
           style: cfg.modeA?.stylePrompt || '',
           ai: cfg.ai,
