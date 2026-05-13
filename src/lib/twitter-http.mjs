@@ -5,6 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import https from 'https';
+import { URL } from 'url';
 import { ClientTransaction } from 'x-client-transaction-id';
 import { JSDOM } from 'jsdom';
 
@@ -433,3 +434,4 @@ export async function getFriendship(username, cookiesFilePath) {
   if (result.status !== 200) return null;
   return JSON.parse(result.body);
 }
+
