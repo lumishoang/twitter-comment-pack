@@ -238,7 +238,19 @@ export async function postTweet(text, cookiesFilePath, options = {}) {
     throw new Error(`CreateTweet failed (${result.status}): ${result.body.slice(0, 200)}`);
   }
   const data = JSON.parse(result.body);
-  return data?.data?.create_tweet?.tweet_results?.result?.rest_id || 'ok';
+  const r = data?.data?.create_tweet?.tweet_results?.result;
+  const replyId =
+    r?.rest_id ||
+    r?.id_str ||
+    r?.legacy?.id_str ||
+    r?.tweet?.rest_id ||
+    r?.tweet?.legacy?.id_str ||
+    r?.core?.rest_id ||
+    null;
+  if (!replyId) {
+    throw new Error(`CreateTweet parse failed: ${JSON.stringify(data).slice(0, 300)}`);
+  }
+  return String(replyId);
 }
 
 export async function searchUserTweets(username, cookiesFilePath, count = 10) {

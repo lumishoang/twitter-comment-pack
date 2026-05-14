@@ -94,3 +94,10 @@ export function getMeta(k) {
 export function setMeta(k, v) {
   db.prepare('INSERT OR REPLACE INTO meta(k, v) VALUES(?, ?)').run(k, String(v));
 }
+
+export function recentAuthorCommentCount(author = '', windowMs = 45 * 60 * 1000) {
+  if (!db || !author) return 0;
+  const since = Date.now() - windowMs;
+  const row = db.prepare('SELECT COUNT(*) AS c FROM commented WHERE author = ? AND ts >= ?').get(author, since);
+  return row?.c || 0;
+}

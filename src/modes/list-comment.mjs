@@ -4,7 +4,7 @@
  */
 import { fetchListTweets, postTweet } from '../lib/twitter-http.mjs';
 import { generateComment } from '../lib/ai-commenter.mjs';
-import { alreadyCommented, markCommented, acquireTweetLock, releaseTweetLock } from '../lib/store.mjs';
+import { alreadyCommented, markCommented, acquireTweetLock, releaseTweetLock, recentAuthorCommentCount } from '../lib/store.mjs';
 import { waitForSlot, postSleep } from '../lib/rate-limiter.mjs';
 import { sendAlert } from '../lib/telegram.mjs';
 
@@ -99,6 +99,12 @@ export async function runListMode(cfg, log) {
         continue;
       }
 
+      const sameAuthorRecent = recentAuthorCommentCount(t.author || '', 45 * 60 * 1000);
+      if (sameAuthorRecent >= 1) {
+        log(`[mode-A] skip ${t.id}: author-cooldown @${t.author}`);
+        continue;
+      }
+
       try {
         const replyTweetId = await postTweet(comment, cfg.cookiesFile, { replyToId: t.id });
         markCommented(t.id, t.author);
@@ -109,6 +115,13 @@ export async function runListMode(cfg, log) {
         if (/RATE_LIMITED/.test(e.message)) {
           await sendAlert(cfg.telegram?.botToken, cfg.telegram?.chatId, `[twitter-comment-pack] Rate limited (${e.message})`);
           return;
+        }
+        if (/code":226|AuthorizationError|automated/i.test(e.message)) {
+          const coolMs = Number(cfg.antiAbuse?.code226CooldownMs) || (15 * 60 * 1000);
+          const coolMin = Math.round(coolMs / 60000);
+          log(`[mode-A] anti-abuse cooldown ${coolMin} min after code226`);
+          await sendAlert(cfg.telegram?.botToken, cfg.telegram?.chatId, `[twitter-comment-pack] anti-abuse 226 hit; cooldown ${coolMin} min`);
+          await new Promise((r) => setTimeout(r, coolMs));
         }
         continue;
       }
